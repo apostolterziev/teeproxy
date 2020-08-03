@@ -31,6 +31,7 @@ var (
 	tlsPrivateKey         = flag.String("key.file", "", "path to the TLS private key file")
 	tlsCertificate        = flag.String("cert.file", "", "path to the TLS certificate file")
 	forwardClientIP       = flag.Bool("forward-client-ip", false, "enable forwarding of the client IP to the backend using the 'X-Forwarded-For' and 'Forwarded' headers")
+	secondaryAuthorization= flag.String("b.authentication", "", "Passes OAuth Authentication token to site b")
 	closeConnections      = flag.Bool("close-connections", false, "close connections to the clients and backends")
 
 	alternateMethodsRegex *regexp.Regexp
@@ -152,6 +153,10 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if matchedByHttpMethod(req.Method) {
 			for _, alt := range h.Alternatives {
 				alternativeRequest = DuplicateRequest(req)
+
+				if *secondaryAuthorization != "" {
+					setAuthorizationHeader(alternativeRequest, secondaryAuthorization)
+				}
 
 				timeout := time.Duration(*alternateTimeout) * time.Millisecond
 
@@ -285,6 +290,10 @@ func DuplicateRequest(request *http.Request) (dup *http.Request) {
 		Close:         true,
 	}
 	return
+}
+
+func setAuthorizationHeader(request *http.Request, authHeader *string) {
+	request.Header.Set("Authorization", *authHeader)
 }
 
 func updateForwardedHeaders(request *http.Request) {
