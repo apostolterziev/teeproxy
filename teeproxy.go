@@ -281,14 +281,19 @@ func DuplicateRequest(request *http.Request) (dup *http.Request) {
 		bodyBytes, _ = ioutil.ReadAll(request.Body)
 	}
 	request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	h := request.Header.Clone()
+	targetMap := make(map[string][]string)
+
+	// Copy from the original map to the target map
+	for key, value := range request.Header {
+		targetMap[key] = value
+	}
 	dup = &http.Request{
 		Method:        request.Method,
 		URL:           request.URL,
 		Proto:         request.Proto,
 		ProtoMajor:    request.ProtoMajor,
 		ProtoMinor:    request.ProtoMinor,
-		Header:        h,
+		Header:        targetMap,
 		Body:          ioutil.NopCloser(bytes.NewBuffer(bodyBytes)),
 		Host:          request.Host,
 		ContentLength: request.ContentLength,
