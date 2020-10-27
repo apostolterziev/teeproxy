@@ -281,13 +281,14 @@ func DuplicateRequest(request *http.Request) (dup *http.Request) {
 		bodyBytes, _ = ioutil.ReadAll(request.Body)
 	}
 	request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	h := request.Header.Clone()
 	dup = &http.Request{
 		Method:        request.Method,
 		URL:           request.URL,
 		Proto:         request.Proto,
 		ProtoMajor:    request.ProtoMajor,
 		ProtoMinor:    request.ProtoMinor,
-		Header:        request.Header.Clone(),
+		Header:        h,
 		Body:          ioutil.NopCloser(bytes.NewBuffer(bodyBytes)),
 		Host:          request.Host,
 		ContentLength: request.ContentLength,
