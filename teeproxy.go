@@ -159,10 +159,6 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 					setAuthorizationHeader(alternativeRequest, secondaryAuthorization)
 				}
 
-				if *primaryAuthorization != "" {
-					setAuthorizationHeader(req, primaryAuthorization)
-				}
-
 				timeout := time.Duration(*alternateTimeout) * time.Millisecond
 
 				setRequestTarget(alternativeRequest, alt.Alternative, alt.AlternativeScheme)
@@ -177,6 +173,9 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	productionRequest = req
+	if *primaryAuthorization != "" {
+		setAuthorizationHeader(productionRequest, primaryAuthorization)
+	}
 	defer func() {
 		if r := recover(); r != nil && *debug {
 			log.Println("Recovered in ServeHTTP(production request) from:", r)
