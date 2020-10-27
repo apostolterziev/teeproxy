@@ -287,7 +287,7 @@ func DuplicateRequest(request *http.Request) (dup *http.Request) {
 		Proto:         request.Proto,
 		ProtoMajor:    request.ProtoMajor,
 		ProtoMinor:    request.ProtoMinor,
-		Header:        request.Header,
+		Header:        request.Header.Clone(),
 		Body:          ioutil.NopCloser(bytes.NewBuffer(bodyBytes)),
 		Host:          request.Host,
 		ContentLength: request.ContentLength,
