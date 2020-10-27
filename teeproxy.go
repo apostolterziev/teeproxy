@@ -32,6 +32,7 @@ var (
 	tlsCertificate        = flag.String("cert.file", "", "path to the TLS certificate file")
 	forwardClientIP       = flag.Bool("forward-client-ip", false, "enable forwarding of the client IP to the backend using the 'X-Forwarded-For' and 'Forwarded' headers")
 	secondaryAuthorization= flag.String("b.authentication", "", "Passes OAuth Authentication token to site b")
+	primaryAuthorization  = flag.String("a.authentication", "", "Passes OAuth Authentication token to site a")
 	closeConnections      = flag.Bool("close-connections", false, "close connections to the clients and backends")
 
 	alternateMethodsRegex *regexp.Regexp
@@ -156,6 +157,10 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 				if *secondaryAuthorization != "" {
 					setAuthorizationHeader(alternativeRequest, secondaryAuthorization)
+				}
+
+				if *primaryAuthorization != "" {
+					setAuthorizationHeader(req, primaryAuthorization)
 				}
 
 				timeout := time.Duration(*alternateTimeout) * time.Millisecond
