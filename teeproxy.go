@@ -167,6 +167,8 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 					alternativeRequest.Host = alt.Alternative
 				}
 
+				//fmt.Println("B=>" + alternativeRequest.Header.Get("Authorization"))
+
 				go handleAlternativeRequest(alternativeRequest, timeout, alt.AlternativeScheme)
 			}
 		}
@@ -181,6 +183,8 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			log.Println("Recovered in ServeHTTP(production request) from:", r)
 		}
 	}()
+
+	//fmt.Println("A=>" + productionRequest.Header.Get("Authorization"))
 
 	setRequestTarget(productionRequest, h.Target, h.TargetScheme)
 
@@ -281,19 +285,14 @@ func DuplicateRequest(request *http.Request) (dup *http.Request) {
 		bodyBytes, _ = ioutil.ReadAll(request.Body)
 	}
 	request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	targetMap := make(map[string][]string)
 
-	// Copy from the original map to the target map
-	for key, value := range request.Header {
-		targetMap[key] = value
-	}
 	dup = &http.Request{
 		Method:        request.Method,
 		URL:           request.URL,
 		Proto:         request.Proto,
 		ProtoMajor:    request.ProtoMajor,
 		ProtoMinor:    request.ProtoMinor,
-		Header:        targetMap,
+		Header:        request.Header,
 		Body:          ioutil.NopCloser(bytes.NewBuffer(bodyBytes)),
 		Host:          request.Host,
 		ContentLength: request.ContentLength,
